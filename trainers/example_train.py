@@ -61,7 +61,8 @@ class ExampleTrainer(BaseTrain):
         self._export_model(estimator, self.config["export_path"])
 
         # get results after training and exporting model
-        self._predict(estimator, self.pred.input_fn)
+        # self._predict(estimator, self.pred.input_fn)
+        self._predict(estimator, self.val.input_fn)
 
     def _export_model(
         self, estimator: tf.estimator.Estimator, save_location: str
@@ -73,7 +74,7 @@ class ExampleTrainer(BaseTrain):
         """
         # this should match the input shape of your model
         x1 = tf.feature_column.numeric_column(
-            "input", shape=[self.config["batch_size"], 28, 28, 1]
+            "input", shape=[self.config["train_batch_size"], 28, 28, 1]
         )
         # create a list in case you have more than one input
         feature_columns = [x1]
