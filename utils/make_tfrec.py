@@ -12,7 +12,7 @@ def main() -> None:
     Convert a set of numpy files to a set of train, eval and test
     tfrecord files. This example is for MNIST
     """
-    data_dir = "../data/temp/"
+    data_dir = "../temp/"
     # get all images
     filenames = glob.glob(f"{data_dir}*_image.npy")
     shuffle(filenames)
@@ -34,11 +34,17 @@ def main() -> None:
             label = np.load(i.replace("_image", "_label"))
         except UnicodeError as e:
             print(i)
+        image_ = []
+        for ix in range(len(img)):
+            #print(len(list(img[ix])))
+            image_.extend(list(img[ix]))
+            #print(len(image_))
+        image_.append(0)
 
         # Create a feature
         feature = {
             "image": tf.train.Feature(
-                float_list=tf.train.FloatList(value=img.flatten().tolist())
+                float_list=tf.train.FloatList(value=image_)
             ),
             "label": tf.train.Feature(
                 int64_list=tf.train.Int64List(value=label.flatten().tolist())
@@ -69,10 +75,15 @@ def main() -> None:
         except UnicodeError as e:
             print(i)
 
+        image_ = []
+        for ix in range(len(img)):
+            image_.extend(list(img[ix]))
+        image_.append(0)
+
         # Create a feature
         feature = {
             "image": tf.train.Feature(
-                float_list=tf.train.FloatList(value=img.flatten().tolist())
+                float_list=tf.train.FloatList(value=image_)
             ),
             "label": tf.train.Feature(
                 int64_list=tf.train.Int64List(value=label.flatten().tolist())
@@ -102,10 +113,16 @@ def main() -> None:
         # Load the image
         img = np.load(i)
 
+        image_ = []
+        for ix in range(len(img)):
+            image_.extend(list(img[ix]))
+
+        image_.append(0)
+
         # Create a feature
         feature = {
             "image": tf.train.Feature(
-                float_list=tf.train.FloatList(value=img.flatten().tolist())
+                float_list=tf.train.FloatList(value=image_)
             )
         }
 
@@ -132,18 +149,18 @@ def _extract_data() -> None:
         curr_row = row.tolist()
         label = [curr_row[0]]
         rows = [np.array(curr_row[i : i + 28]) for i in range(2, len(curr_row), 28)]
-        np.save("temp/{}_label.npy".format(j), np.array(label))
-        np.save("temp/{}_image.npy".format(j), np.array(rows))
+        np.save("../temp/{}_label.npy".format(j), np.array(label))
+        np.save("../temp/{}_image.npy".format(j), np.array(rows))
 
     df = pd.read_csv("test.csv")
 
     for j, row in df.iterrows():
         curr_row = row.tolist()
         rows = [np.array(curr_row[i : i + 28]) for i in range(1, len(curr_row), 28)]
-        np.save("temp/{}_test.npy".format(j), np.array(rows))
+        np.save("../temp/{}_test.npy".format(j), np.array(rows))
 
 
 if __name__ == "__main__":
-    if True:
-        _extract_data()
+    #if True:
+    #    _extract_data()
     main()

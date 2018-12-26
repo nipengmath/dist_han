@@ -13,7 +13,7 @@ class TFRecordDataLoader(DataLoader):
         :param mode: current training mode (train, test, predict)
         """
         super().__init__(config, mode)
-
+        print(config)
         # Get a list of files in case you are using multiple tfrecords
         if self.mode == "train":
             self.file_names = self.config["train_files"]
@@ -23,6 +23,7 @@ class TFRecordDataLoader(DataLoader):
             self.batch_size = self.config["eval_batch_size"]
         else:
             self.file_names = self.config["test_files"]
+            self.batch_size = self.config["test_batch_size"]
 
     def input_fn(self) -> tf.data.Dataset:
         """
@@ -68,7 +69,6 @@ class TFRecordDataLoader(DataLoader):
                 "label": tf.FixedLenFeature(shape=[1], dtype=tf.int64),
             }
             example = tf.parse_single_example(example, features=features)
-
             # only augment training data
             if self.mode == "train":
                 input_data = self._augment(example["image"])

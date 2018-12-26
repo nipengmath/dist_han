@@ -20,6 +20,11 @@ def get_args() -> dict:
     """
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
+        "--job-name",
+        type=str,
+        help="job name"
+    )
+    parser.add_argument(
         "--train-files",
         help="GCS or local paths to training data",
         nargs="+",
@@ -39,6 +44,9 @@ def get_args() -> dict:
         help="Batch size for evaluation steps",
         type=int,
         default=32,
+    )
+    parser.add_argument(
+        "--test-batch-size", help="Batch size for testing steps", type=int, default=32
     )
     parser.add_argument(
         "--export-path",

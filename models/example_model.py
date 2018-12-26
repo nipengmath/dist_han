@@ -39,7 +39,8 @@ class Mnist(BaseModel):
             # define what to output during serving
             export_outputs = {
                 "labels": tf.estimator.export.PredictOutput(
-                    {"id": features["id"], "label": predictions["class"]}
+                    ## {"id": features["id"], "label": predictions["class"]}
+                    {"label": predictions["class"]}
                 )
             }
             return tf.estimator.EstimatorSpec(
@@ -47,6 +48,7 @@ class Mnist(BaseModel):
             )
 
         # calculate loss
+        labels = tf.reshape(labels, [-1, 1])
         loss = tf.losses.sparse_softmax_cross_entropy(labels=labels, logits=logits)
 
         # add summaries for tensorboard
@@ -57,7 +59,7 @@ class Mnist(BaseModel):
             # create a evaluation metric
             summaries_dict = {
                 "val_accuracy": tf.metrics.accuracy(
-                    labels, predictions=predictions["classes"]
+                    labels, predictions=predictions["class"]
                 )
             }
             return tf.estimator.EstimatorSpec(
