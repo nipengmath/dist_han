@@ -55,6 +55,23 @@ def get_args() -> dict:
     )
 
     parser.add_argument(
+        "--cpu-count",
+        help="use how many cpu to process tfrecord data",
+        type=int,
+        default=32,
+    )
+
+    parser.add_argument(
+        "--para-max-num",
+        type=int,
+        default=32,
+    )
+    parser.add_argument(
+        "--para-max-length",
+        type=int,
+        default=32,
+    )
+    parser.add_argument(
         "--eval-files",
         help="GCS or local paths to evaluation data",
         nargs="+",

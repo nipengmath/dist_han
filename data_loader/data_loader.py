@@ -1,6 +1,6 @@
 from base.data_loader import DataLoader
 import tensorflow as tf
-import multiprocessing
+## import multiprocessing
 from typing import Tuple, Dict
 import random
 
@@ -35,7 +35,9 @@ class TFRecordDataLoader(DataLoader):
         dataset = tf.data.TFRecordDataset(self.file_names)
         # create a parallel parsing function based on number of cpu cores
         dataset = dataset.map(
-            map_func=self._parse_example, num_parallel_calls=multiprocessing.cpu_count()
+            map_func=self._parse_example,
+            ## num_parallel_calls=multiprocessing.cpu_count()
+            num_parallel_calls=self.config["cpu_count"]
         )
 
         # only shuffle training data
@@ -64,42 +66,22 @@ class TFRecordDataLoader(DataLoader):
         with tf.device("/cpu:0"):
             # define input shapes
             # TODO: update this for your data set
-            features = {
-                "image": tf.FixedLenFeature(shape=[28, 28, 1], dtype=tf.float32),
-                "label": tf.FixedLenFeature(shape=[1], dtype=tf.int64),
+            # features = {
+            #     "image": tf.FixedLenFeature(shape=[28, 28, 1], dtype=tf.float32),
+            #     "label": tf.FixedLenFeature(shape=[1], dtype=tf.int64),
+            # }
+            # example = tf.parse_single_example(example, features=features)
+            # input_data = example["image"]
+
+            features={
+                "context_idxs": tf.FixedLenFeature([], tf.string),
+                "y": tf.FixedLenFeature([], tf.string),
+                "id": tf.FixedLenFeature([], tf.int64)
             }
             example = tf.parse_single_example(example, features=features)
-            # only augment training data
-            if self.mode == "train":
-                input_data = self._augment(example["image"])
-            else:
-                input_data = example["image"]
-
-            return {"input": input_data}, example["label"]
-
-    @staticmethod
-    def _augment(example: tf.Tensor) -> tf.Tensor:
-        """
-        Randomly augment the input image to try improve training variance
-        :param example: parsed input example
-        :return: the same input example but possibly augmented
-        """
-        # random rotation
-        if random.uniform(0, 1) > 0.5:
-            example = tf.contrib.image.rotate(
-                example, tf.random_uniform((), minval=-0.2, maxval=0.2)
-            )
-        # random noise
-        if random.uniform(0, 1) > 0.5:
-            # assumes values are normalised between 0 and 1
-            noise = tf.random_normal(
-                shape=tf.shape(example), mean=0.0, stddev=0.2, dtype=tf.float32
-            )
-            example = example + noise
-            example = tf.clip_by_value(example, 0.0, 1.0)
-            # random flip
-            example = tf.image.random_flip_up_down(example)
-        return tf.image.random_flip_left_right(example)
+            input_data = example["context_idxs"]
+            label = example["y"]
+            return {"input": input_data}, label
 
     def __len__(self) -> int:
         """
